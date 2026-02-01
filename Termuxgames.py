@@ -92,8 +92,7 @@ def animated_title():
     
     time.sleep(0.4)
     
-    print("")
-    print("")
+    print("") 
     
     ascii_lines = [
         "░█▀▄░█░█░░░█▀▄░█▀█░▀█▀░█▀▀░█░█░░",
@@ -101,7 +100,7 @@ def animated_title():
         "░▀▀░░░▀░░░░▀▀░░▀▀▀░░▀░░▀▀▀░▀░▀░░"
     ]
     for line in ascii_lines:
-        animated_print(" " * 10 + line, delay=0.015)
+        animated_print(" " * 5 + line, delay=0.005)
     
     time.sleep(0.3)
     
@@ -175,8 +174,10 @@ def show_info():
     print(" " * 5 + "+" + "-" * 35 + "+")
     print(" " * 5 + "| Thank you for using TERMUX GAMES. |")
     print(" " * 5 + "+" + "-" * 35 + "+")
-    print("\n" + " " * 5 + "PRODUCER: by dotch")
+    print("\n" + " " * 5 + "DEVELOPERS: by dotch")
+    print(" " * 17 + "by gimmikookie")
     print(" " * 5 + "TikTok: _dotch")
+    print(" " * 5 + "TikTok: gimmikookie")
     print("\n" * 2)
     print(" " * 5 + "Press ENTER to exit.")
     
