@@ -5,8 +5,13 @@ Hey friend, I was getting bored installing things in Termux, so I made a tool. I
 
 
 # İnstall
+apt install git python
 
-git 
+git clone https://github.com/dotch1r/Termux-games.git
+
+cd Termux-games
+
+python termuxgames.py
 
 
 
