@@ -5,15 +5,15 @@ Hey friend, I was getting bored installing things in Termux, so I made a tool. I
 
 
 # İnstall
-apt update && apt upgrade
+- `apt update && apt upgrade`
 
-apt install git python
+- `apt install git python`
 
-git clone https://github.com/dotch1r/Termux-games.git
+- `git clone https://github.com/dotch1r/Termux-games.git`
 
-cd Termux-games
+- `cd Termux-games`
 
-python Termuxgames.py
+- `python Termuxgames.py`
 
 
 
