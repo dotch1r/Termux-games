@@ -21,11 +21,15 @@ def play_again():
 def load_scores():
     if os.path.exists(SCORE_FILE):
         with open(SCORE_FILE, 'r') as f:
-            return json.load(f)
+            data = json.load(f)
+            if "rock_paper_scissors" not in data:
+                data["rock_paper_scissors"] = {"wins": 0, "losses": 0, "draws": 0}
+            return data
     return {
         "tic_tac_toe": {"wins": 0, "losses": 0, "draws": 0},
         "hangman": {"easy_wins": 0, "easy_losses": 0, "medium_wins": 0, "medium_losses": 0, "hard_wins": 0, "hard_losses": 0},
-        "number_guessing": {"wins": 0, "losses": 0, "total_attempts": 0, "games_played": 0}
+        "number_guessing": {"wins": 0, "losses": 0, "total_attempts": 0, "games_played": 0},
+        "rock_paper_scissors": {"wins": 0, "losses": 0, "draws": 0}
     }
 
 def save_scores(scores):
@@ -58,9 +62,18 @@ def update_score(game, result, difficulty=None, attempts=None):
             scores["number_guessing"]["losses"] += 1
         if attempts is not None:
             scores["number_guessing"]["total_attempts"] += attempts
+    elif game == "rock_paper_scissors":
+        if "rock_paper_scissors" not in scores:
+            scores["rock_paper_scissors"] = {"wins": 0, "losses": 0, "draws": 0}
+        if result == "win":
+            scores["rock_paper_scissors"]["wins"] += 1
+        elif result == "loss":
+            scores["rock_paper_scissors"]["losses"] += 1
+        elif result == "draw":
+            scores["rock_paper_scissors"]["draws"] += 1
     save_scores(scores)
 
-def animated_print(text, delay=0.003):
+def animated_print(text, delay=0.005):
     for char in text:
         sys.stdout.write(char)
         sys.stdout.flush()
@@ -88,7 +101,7 @@ def animated_title():
     
     print("\n")
     for line in title_lines:
-        animated_print(line, delay=0.003)
+        animated_print(line, delay=0.005)
     
     time.sleep(0.4)
     
@@ -141,9 +154,9 @@ def simple_title():
     print("")
     
     ascii_lines = [
-        " " * 10 + "░█▀▄░█░█░░░█▀▄░█▀█░▀█▀░█▀▀░█░█░░",
-        " " * 10 + "░█▀▄░░█░░░░█░█░█░█░░█░░█░░░█▀█░░",
-        " " * 10 + "░▀▀░░░▀░░░░▀▀░░▀▀▀░░▀░░▀▀▀░▀░▀░░"
+        " " * 5 + "░█▀▄░█░█░░░█▀▄░█▀█░▀█▀░█▀▀░█░█░░",
+        " " * 5 + "░█▀▄░░█░░░░█░█░█░█░░█░░█░░░█▀█░░",
+        " " * 5 + "░▀▀░░░▀░░░░▀▀░░▀▀▀░░▀░░▀▀▀░▀░▀░░"
     ]
     for line in ascii_lines:
         print(line)
@@ -155,9 +168,10 @@ def print_menu():
     print("[2] Pong              (Coming Soon)")
     print("[3] Hangman")
     print("[4] Number Guessing")
-    print("[5] Statistics")
-    print("[6] Info")
-    print("[7] Exit\n")
+    print("[5] Rock Paper Scissors")
+    print("[6] Statistics")
+    print("[7] Info")
+    print("[8] Exit\n")
 
 def show_coming_soon():
     os.system('clear')
@@ -206,7 +220,11 @@ def show_statistics():
     win_rate_ng = (ng["wins"] / total_ng * 100) if total_ng > 0 else 0
     avg_attempts = ng["total_attempts"] / ng["games_played"] if ng["games_played"] > 0 else 0
     
-    total_games = total_ttt + total_hng + ng["games_played"]
+    rps = scores.get("rock_paper_scissors", {"wins": 0, "losses": 0, "draws": 0})
+    total_rps = rps["wins"] + rps["losses"] + rps["draws"]
+    win_rate_rps = (rps["wins"] / total_rps * 100) if total_rps > 0 else 0
+    
+    total_games = total_ttt + total_hng + ng["games_played"] + total_rps
     
     print(" " * 8 + f"Total Games Played: {total_games}")
     print(" " * 8 + "========================\n")
@@ -229,10 +247,16 @@ def show_statistics():
     print(" " * 8 + f"Average Attempts: {avg_attempts:.1f}")
     print("")
     
+    print(" " * 5 + "Rock Paper Scissors:")
+    print(" " * 8 + f"Wins: {rps['wins']} | Losses: {rps['losses']} | Draws: {rps['draws']}")
+    print(" " * 8 + f"Win Rate: {win_rate_rps:.1f}%")
+    print("")
+    
     games_played = {
         "Tic-Tac-Toe": total_ttt,
         "Hangman": total_hng,
-        "Number Guessing": ng["games_played"]
+        "Number Guessing": ng["games_played"],
+        "Rock Paper Scissors": total_rps
     }
     most_played = max(games_played, key=games_played.get)
     print(" " * 8 + f"Most Played Game: {most_played} ({games_played[most_played]} games)")
@@ -410,7 +434,7 @@ def tic_tac_toe():
             if check_winner(current_player):
                 clear_and_show_board()
                 winner = "You WIN!" if (is_vs_bot and current_player == 'X') else f"Player {current_player} WINS!" if not is_vs_bot else "Computer WINS!"
-                print("\n" + " " * 11 + f"🎉 {winner} 🎉")
+                print("\n" + " " * 11 + winner)
                 update_score("tic_tac_toe", "win" if current_player == 'X' else "loss")
                 game_over = True
             elif is_draw():
@@ -609,7 +633,7 @@ def hangman():
             print(" " * 10 + f"The word was: {word}")
             update_score("hangman", "win", difficulty.lower())
         else:
-            print(" " * 10 + "YOU LOSE! 😔")
+            print(" " * 10 + "😔 YOU LOSE! 😔")
             print(" " * 10 + f"The word was: {word}")
             update_score("hangman", "loss", difficulty.lower())
 
@@ -681,7 +705,7 @@ def number_guessing():
             print(" " * 10 + f"The number was: {secret_number}")
             update_score("number_guessing", "win", attempts=attempts_used)
         else:
-            print(" " * 10 + "YOU LOSE! 😔")
+            print(" " * 10 + "😔 YOU LOSE! 😔")
             print(" " * 10 + f"The number was: {secret_number}")
             update_score("number_guessing", "loss", attempts=attempts_used)
 
@@ -694,13 +718,108 @@ def number_guessing():
             simple_title()
             return
 
+def rock_paper_scissors():
+    while True:
+        os.system('clear')
+        print("\n" * 3)
+        print(" " * 5 + "ROCK PAPER SCISSORS 🔥")
+        print("\n")
+        print(" " * 8 + "Best of 5 - First to 3 wins")
+        print("\n")
+        print(" " * 8 + "Your choices:")
+        print(" " * 10 + "r - Rock")
+        print(" " * 10 + "p - Paper")
+        print(" " * 10 + "s - Scissors")
+        print(" " * 10 + "q - Quit")
+        print("\n" * 2)
+        print(" " * 8 + "Press ENTER to start...")
+        input()
+
+        player_score = 0
+        computer_score = 0
+        rounds = 0
+
+        rock = "ROCK ✊"
+        paper = "PAPER ✋"
+        scissors = "SCISSORS ✌️"
+
+        while player_score < 3 and computer_score < 3:
+            os.system('clear')
+            print("\n" * 2)
+            print(" " * 5 + "ROCK PAPER SCISSORS 🔥")
+            print(" " * 8 + f"Score: You {player_score}   Computer {computer_score}")
+            print(" " * 8 + f"Round {rounds + 1}")
+            print("\n")
+            print(" " * 8 + "Your move (r / p / s / q): ", end="")
+
+            player_choice = input().strip().lower()
+
+            if player_choice == 'q':
+                print(" " * 10 + "Game quit.")
+                time.sleep(1.5)
+                os.system('clear')
+                simple_title()
+                return
+
+            if player_choice not in ['r', 'p', 's']:
+                print(" " * 8 + "Invalid move! Use r, p or s.")
+                time.sleep(1.2)
+                continue
+
+            computer_choice = random.choice(['r', 'p', 's'])
+
+            rounds += 1
+            os.system('clear')
+            print("\n" * 2)
+            print(" " * 8 + f"You chose: {rock if player_choice == 'r' else paper if player_choice == 'p' else scissors}")
+            print(" " * 8 + f"Computer chose: {rock if computer_choice == 'r' else paper if computer_choice == 'p' else scissors}")
+            print("\n")
+
+            if player_choice == computer_choice:
+                print(" " * 12 + "DRAW! 🤝")
+                update_score("rock_paper_scissors", "draw")
+            elif (player_choice == 'r' and computer_choice == 's') or \
+                 (player_choice == 'p' and computer_choice == 'r') or \
+                 (player_choice == 's' and computer_choice == 'p'):
+                print(" " * 12 + "WIN! 🎉")
+                player_score += 1
+                update_score("rock_paper_scissors", "win")
+            else:
+                print(" " * 12 + "LOSS! 💀")
+                computer_score += 1
+                update_score("rock_paper_scissors", "loss")
+
+            time.sleep(2.2)
+
+        os.system('clear')
+        print("\n" * 3)
+        print(" " * 5 + "GAME OVER")
+        print(" " * 8 + f"Final Score: You {player_score} - Computer {computer_score}")
+        print("\n")
+        if player_score == 3:
+            print(" " * 8 + "YOU WIN THE GAME! 🎊🎉")
+            print(" " * 8 + "Legendary performance king! 🔥")
+        else:
+            print(" " * 8 + "YOU LOSE THE GAME! 😔")
+            print(" " * 8 + "One more try? You can crush it next time!")
+
+        print("\n" * 2)
+        if play_again():
+            continue
+        else:
+            print(" " * 8 + "Returning to main menu...")
+            time.sleep(2)
+            os.system('clear')
+            simple_title()
+            return
+
 def main():
     os.system('clear')
     animated_title()  
 
     while True:
         print_menu()
-        choice = input("Your choice (1-7): ").strip().lower()
+        choice = input("Your choice (1-8): ").strip().lower()
 
         os.system('clear')
 
@@ -713,10 +832,12 @@ def main():
         elif choice == '4':
             number_guessing()
         elif choice == '5':
-            show_statistics()
+            rock_paper_scissors()
         elif choice == '6':
-            show_info()
+            show_statistics()
         elif choice == '7':
+            show_info()
+        elif choice == '8':
             print("Exiting Termux Games...")
             time.sleep(1)
             os.system('clear')
