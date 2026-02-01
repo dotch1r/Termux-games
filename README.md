@@ -13,7 +13,7 @@ git clone https://github.com/dotch1r/Termux-games.git
 
 cd Termux-games
 
-python termuxgames.py
+python Termuxgames.py
 
 
 
